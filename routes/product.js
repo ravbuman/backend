@@ -47,4 +47,9 @@ router.get('/users/all', productController.getAllUsers); // admin only in produc
 // Admin: get all orders for a user
 router.get('/orders/user/:userId', productController.getOrdersByUserId); // admin only in production
 
+// Test communication services (admin only)
+router.post('/test/communications', productController.testCommunicationServices);
+// Test Brevo email service specifically (admin only)
+router.post('/test/brevo-emails', productController.testBrevoEmailService);
+
 export default router;

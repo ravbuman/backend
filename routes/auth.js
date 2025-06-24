@@ -12,22 +12,57 @@ const JWT_SECRET = process.env.JWT_SECRET || 'RaviBuraga';
 // Register
 router.post('/register', async (req, res) => {
   try {
-
-    const { username, password, name, phone } = req.body;
-    if (!username || !password || !name || !phone) {
-
+    const { username, password, name, email, phone } = req.body;
+    
+    if (!username || !password || !name || !email || !phone) {
       return res.status(400).json({ message: 'All fields are required.' });
     }
-    const existing = await User.findOne({ username });
-    if (existing) {
 
-      return res.status(409).json({ message: 'Username already exists.' });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address.' });
     }
+
+    // Check if username or email already exists
+    const existingUser = await User.findOne({ 
+      $or: [
+        { username },
+        { email: email.toLowerCase() }
+      ]
+    });
+    
+    if (existingUser) {
+      if (existingUser.username === username) {
+        return res.status(409).json({ message: 'Username already exists.' });
+      }
+      if (existingUser.email === email.toLowerCase()) {
+        return res.status(409).json({ message: 'Email already exists.' });
+      }
+    }
+
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hashed, name, phone });
+    const user = await User.create({ 
+      username, 
+      password: hashed, 
+      name, 
+      email: email.toLowerCase(), 
+      phone 
+    });
+    
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '10d' });
 
-    res.status(201).json({ token, user: { userId: user._id, username: user.username, name: user.name, phone: user.phone, addresses: user.addresses } });
+    res.status(201).json({ 
+      token, 
+      user: { 
+        userId: user._id, 
+        username: user.username, 
+        name: user.name, 
+        email: user.email, 
+        phone: user.phone, 
+        addresses: user.addresses 
+      } 
+    });
   } catch (err) {
     console.error('[REGISTER] Error:', err);
     res.status(500).json({ message: 'Server error.' });
@@ -97,7 +132,18 @@ router.post('/login', async (req, res) => {
     }
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '10d' });
 
-    res.json({ token, user: { userId: user._id, username: user.username, name: user.name, phone: user.phone, addresses: user.addresses, isAdmin: false } });
+    res.json({ 
+      token, 
+      user: { 
+        userId: user._id, 
+        username: user.username, 
+        name: user.name, 
+        email: user.email, 
+        phone: user.phone, 
+        addresses: user.addresses, 
+        isAdmin: false 
+      } 
+    });
   } catch (err) {
     console.error('[LOGIN] Error:', err);
     res.status(500).json({ message: 'Server error.' });
@@ -121,7 +167,7 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    res.json({ user: { userId: user._id, username: user.username, name: user.name, phone: user.phone, addresses: user.addresses } });
+    res.json({ user: { userId: user._id, username: user.username, name: user.name, phone: user.phone, addresses: user.addresses, mail:user.email, email:user.email } });
   } catch (err) {
     console.error('[ME] Error:', err);
     res.status(401).json({ message: 'Invalid or expired token.' });

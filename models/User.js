@@ -10,12 +10,16 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   name: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
   phone: { type: String, required: true },
-  addresses: { type: [addressSchema], default: [] },
-  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  addresses: { type: [addressSchema], default: [] },wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   cart: [{
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    quantity: { type: Number, default: 1 }
+    quantity: { type: Number, default: 1 },
+    variantId: { type: String }, // Store selected variant ID
+    variantName: { type: String }, // Store variant name for easy access
+    variantPrice: { type: Number }, // Store variant price at time of adding
+    addedAt: { type: Date, default: Date.now }
   }],
   pushToken: { type: String },
 }, { timestamps: true });

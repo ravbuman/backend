@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test:communications": "node test-communications.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1692.0",
@@ -18,7 +19,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.8.7",
     "multer": "^2.0.1",
-    "node-cron": "^4.1.0"
+    "node-cron": "^4.1.0",
+    "sib-api-v3-sdk": "^8.5.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
